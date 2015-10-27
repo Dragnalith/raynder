@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 2.8)
+
+add_subdirectory("external/glm")
+add_subdirectory("external/SFML")
+
+include_directories(
+    "external/SFML/include"
+    "external/glm/"
+)
+add_subdirectory("source")
