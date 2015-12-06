@@ -12,6 +12,16 @@
 #define DRGN_ASSERT_NOT_IMPLEMENTED() DRGN_ASSERT(false)
 #endif // DRGN_ASSERT_NOT_IMPLEMENTED
 
+#ifndef DRGN_ARRAYSIZE
+namespace
+{
+template <typename T, size_t N>
+char(&ArraySizeHelper(T(&t)[N]))[N];
+}
+
+#define DRGN_ARRAYSIZE(x) (sizeof(ArraySizeHelper(x))) 
+#endif // DRGN_ARRAYSIZE
+
 namespace drgn
 {
 

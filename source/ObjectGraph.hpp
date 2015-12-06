@@ -3,12 +3,18 @@
 
 #include "Object.hpp"
 
+#include <vector>
+
 class Intersection;
 
 class ObjectGraph : public Object
 {
 public:
+    void Add(Object const& object);
     bool Intersect(Ray const& ray, Intersection* pIntersection) const override;
+
+private:
+    std::vector<Object const*> m_Objects;
 };
 
 #endif

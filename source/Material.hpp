@@ -5,6 +5,8 @@
 
 struct Material
 {
+    Material(glm::vec3 const& albedo) : Albedo(albedo) {}
+
     glm::vec3 Albedo;
 };
 

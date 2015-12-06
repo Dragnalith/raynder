@@ -9,22 +9,14 @@
 #include "Helper.hpp"
 #include "CoordinateSystem.hpp"
 #include "Material.hpp"
+#include "Mesh.hpp"
+#include "ObjectGraph.hpp"
 
 #include "glm/glm.hpp"
 
 int const Width = 700;
 int const Height = 700;
 
-glm::vec3 const CameraPosition(0.f, 0.f, 4.f);
-glm::vec3 const CameraFront(0.f, 0.f, -1.f);
-glm::vec3 const CameraUp(0.f, 1.f, 0.f);
-float const CameraBottom = -0.75f;
-float const CameraTop    =  0.75f;
-float const CameraLeft   = -0.75f;
-float const CameraRight  =  0.75f;
-
-glm::vec3 const SphereCenter(0.f, 0.f, 0.f);
-float const SphereRadius = 2.f;
 
 glm::u8vec4 SampleRay(Ray const& ray, Object const& scene)
 {
@@ -51,13 +43,37 @@ glm::u8vec4 SampleRay(Ray const& ray, Object const& scene)
 
 int main(int argc, char** argv)
 {
+    glm::vec3 const CameraPosition(0.f, 0.f, 4.f);
+    glm::vec3 const CameraFront(0.f, 0.f, -1.f);
+    glm::vec3 const CameraUp(0.f, 1.f, 0.f);
+    float const CameraBottom = -0.75f;
+    float const CameraTop    =  0.75f;
+    float const CameraLeft   = -0.75f;
+    float const CameraRight  =  0.75f;
+
+    glm::vec3 const SphereCenter(0.f, 0.f, 0.f);
+    float const SphereRadius = 2.f;
+
+    // Scene objects
+    Camera camera(CameraPosition, CameraFront, CameraUp,
+        CameraBottom, CameraTop, CameraLeft, CameraRight);
+
+    Sphere sphere(SphereCenter, SphereRadius, Material(glm::vec3(1.0f, 0.0f, 0.0f)));
+
+    glm::vec3 backwallArray[] = {
+        glm::vec3(1.5f, 1.5f, -1.5f), glm::vec3(-1.5f, 1.5f, -1.5f), glm::vec3(-1.5f, -1.5f, -1.5f),
+        glm::vec3(-1.5f, -1.5f, -1.5f), glm::vec3(1.5f, -1.5f, -1.5f),  glm::vec3(1.5f, 1.5f, -1.5f)
+    };
+    Mesh backWall(backwallArray, DRGN_ARRAYSIZE(backwallArray), Material(glm::vec3(1.0f, 1.0f, 1.0f)));
+
+    ObjectGraph scene;
+    scene.Add(sphere);
+    scene.Add(backWall);
+
     // Create the main window
     sf::RenderWindow window(sf::VideoMode(Width, Height), "SFML window");
 
     std::vector<uint8_t> data(Width*Height * 4);
-    Camera camera(CameraPosition, CameraFront, CameraUp,
-        CameraBottom, CameraTop, CameraLeft, CameraRight);
-    Sphere sphere(SphereCenter, SphereRadius);
 
     auto const imageCoordSystem = camera.GetScreenSpaceCoordinateSystem();
     auto const xPixelVec = imageCoordSystem.X / float(Width);
@@ -72,7 +88,7 @@ int main(int argc, char** argv)
         {
             auto samplePosition = imageOrigin + float(x) * xPixelVec + float(y) * yPixelVec;
             Ray  ray(cameraOrigin, samplePosition - cameraOrigin);
-            auto color = SampleRay(ray, sphere);
+            auto color = SampleRay(ray, scene);
             int offset = (y * Width + x) * 4;
 
             data[offset + 0] = color.r;

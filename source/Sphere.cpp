@@ -5,10 +5,10 @@
 
 #include "glm/glm.hpp"
 
-Sphere::Sphere(glm::vec3 const& center, float const radius)
+Sphere::Sphere(glm::vec3 const& center, float const radius, Material const& material)
     : m_Center(center)
     , m_Radius(radius)
-    , m_Material(Material{glm::vec3(1.f, 0.f, 0.f)})
+    , m_Material(material)
 {
 }
 
@@ -63,7 +63,7 @@ bool Sphere::Intersect(Ray const& ray, Intersection* pIntersection) const
     glm::vec3 const position = ray.GetOrigin() + distance * ray.GetDirection();
     glm::vec3 const normal   = position - m_Center;
 
-    *pIntersection = Intersection(position, normal, &m_Material);
+    *pIntersection = Intersection(distance, normal, &m_Material);
 
     return true;
 }
