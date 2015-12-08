@@ -17,18 +17,13 @@ float const Epsilon = 0.00001f;
 
 bool triangle_intersection(Ray const&ray, glm::vec3 const&p0, glm::vec3 const& p1, glm::vec3 const& p2, float* pDistance)
 {
-    DRGN_ASSERT_NOT_IMPLEMENTED();
-    return false;
-
-    // TODO(mdelorme): Implement Möller–Trumbore intersection algorithm
-    /*
     glm::vec3 const e0 = p1 - p0;
     glm::vec3 const e1 = p2 - p0;
 
     glm::vec3 const d = ray.GetDirection();
 
-    glm::vec3 const P = glm::cross(e1, d);
-    float const det = glm::dot(e0, P);
+    glm::vec3 const P = glm::cross(d, e1);
+    float const det = glm::dot(P, e0);
 
     if (-Epsilon < det && det < Epsilon)
     {
@@ -47,12 +42,12 @@ bool triangle_intersection(Ray const&ray, glm::vec3 const&p0, glm::vec3 const& p
     glm::vec3 const Q = glm::cross(T, e0);
     float const v = glm::dot(d, Q) * inv_det;
 
-    if (v < 0.f || 1.f < v)
+    if (v < 0.f || 1.f < (u + v))
     {
         return false;
     }
 
-    *pDistance = -dot(e1, Q) * inv_det;
+    *pDistance = dot(e1, Q) * inv_det;
 
     if (*pDistance >= 0.f)
     {
@@ -62,7 +57,6 @@ bool triangle_intersection(Ray const&ray, glm::vec3 const&p0, glm::vec3 const& p
     {
         return false;
     }
-    */
 }
 
 }
