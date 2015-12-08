@@ -52,7 +52,7 @@ int main(int argc, char** argv)
     float const CameraRight  =  0.75f;
 
     glm::vec3 const SphereCenter(0.f, 0.f, 0.f);
-    float const SphereRadius = 2.f;
+    float const SphereRadius = 0.5f;
 
     // Scene objects
     Camera camera(CameraPosition, CameraFront, CameraUp,
@@ -60,15 +60,46 @@ int main(int argc, char** argv)
 
     Sphere sphere(SphereCenter, SphereRadius, Material(glm::vec3(1.0f, 0.0f, 0.0f)));
 
-    glm::vec3 backwallArray[] = {
-        glm::vec3(1.5f, 1.5f, -1.5f), glm::vec3(-1.5f, 1.5f, -1.5f), glm::vec3(-1.5f, -1.5f, -1.5f),
-        glm::vec3(-1.5f, -1.5f, -1.5f), glm::vec3(1.5f, -1.5f, -1.5f),  glm::vec3(1.5f, 1.5f, -1.5f)
+    float const size = 1.5f;
+    glm::vec3 backWallArray[] = {
+        glm::vec3( size,  size, -size), glm::vec3(-size,  size, -size), glm::vec3(-size, -size, -size),
+        glm::vec3(-size, -size, -size), glm::vec3( size, -size, -size), glm::vec3( size,  size, -size)
     };
-    Mesh backWall(backwallArray, DRGN_ARRAYSIZE(backwallArray), Material(glm::vec3(1.0f, 1.0f, 1.0f)));
+    glm::vec3 frontWallArray[] = {
+        glm::vec3(-size,  size, size), glm::vec3( size,  size, size), glm::vec3( size, -size, size),
+        glm::vec3( size, -size, size), glm::vec3(-size, -size, size), glm::vec3(-size,  size, size)
+    };
+    glm::vec3 leftWallArray[] = {
+        glm::vec3(-size,  size,  size), glm::vec3(-size,  size, -size), glm::vec3(-size, -size, -size),
+        glm::vec3(-size, -size, -size), glm::vec3(-size, -size,  size), glm::vec3(-size,  size,  size)
+    };
+    glm::vec3 rightWallArray[] = {
+        glm::vec3(size,  size, -size), glm::vec3(size,  size,  size), glm::vec3(size, -size,  size),
+        glm::vec3(size, -size,  size), glm::vec3(size, -size, -size), glm::vec3(size,  size, -size)
+    };
+    glm::vec3 bottomWallArray[] = {
+        glm::vec3(-size, -size,  size), glm::vec3( size, -size,  size), glm::vec3( size, -size, -size),
+        glm::vec3( size, -size, -size), glm::vec3(-size, -size, -size), glm::vec3(-size, -size,  size)
+    };
+    glm::vec3 topWallArray[] = {
+        glm::vec3( size, size,  size), glm::vec3(-size, size,  size), glm::vec3(-size, size, -size),
+        glm::vec3(-size, size, -size), glm::vec3( size, size, -size), glm::vec3( size, size,  size)
+    };
+    Mesh backWall(backWallArray, DRGN_ARRAYSIZE(backWallArray), Material(glm::vec3(1.0f, 1.0f, 1.0f)));
+    Mesh leftWall(leftWallArray, DRGN_ARRAYSIZE(leftWallArray), Material(glm::vec3(0.0f, 0.0f, 1.0f)));
+    Mesh rightWall(rightWallArray, DRGN_ARRAYSIZE(rightWallArray), Material(glm::vec3(0.0f, 1.0f, 0.0f)));
+    Mesh topWall(topWallArray, DRGN_ARRAYSIZE(topWallArray), Material(glm::vec3(1.0f, 1.0f, 1.0f)));
+    Mesh bottomWall(bottomWallArray, DRGN_ARRAYSIZE(bottomWallArray), Material(glm::vec3(1.0f, 1.0f, 1.0f)));
+    Mesh frontWall(frontWallArray, DRGN_ARRAYSIZE(frontWallArray), Material(glm::vec3(1.0f, 1.0f, 1.0f)));
 
     ObjectGraph scene;
     scene.Add(sphere);
     scene.Add(backWall);
+    scene.Add(leftWall);
+    scene.Add(rightWall);
+    scene.Add(topWall);
+    scene.Add(bottomWall);
+    //scene.Add(frontWall);
 
     // Create the main window
     sf::RenderWindow window(sf::VideoMode(Width, Height), "SFML window");
