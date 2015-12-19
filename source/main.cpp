@@ -58,7 +58,7 @@ int main(int argc, char** argv)
     Camera camera(CameraPosition, CameraFront, CameraUp,
         CameraBottom, CameraTop, CameraLeft, CameraRight);
 
-    Sphere sphere(SphereCenter, SphereRadius, Material(glm::vec3(1.0f, 0.0f, 0.0f)));
+    Sphere sphere(SphereCenter, SphereRadius, DiffuseMaterial(glm::vec3(1.0f, 0.0f, 0.0f)));
 
     float const size = 1.5f;
     glm::vec3 backWallArray[] = {
@@ -85,14 +85,25 @@ int main(int argc, char** argv)
         glm::vec3( size, size,  size), glm::vec3(-size, size,  size), glm::vec3(-size, size, -size),
         glm::vec3(-size, size, -size), glm::vec3( size, size, -size), glm::vec3( size, size,  size)
     };
-    Mesh backWall(backWallArray, DRGN_ARRAYSIZE(backWallArray), Material(glm::vec3(1.0f, 1.0f, 1.0f)));
-    Mesh leftWall(leftWallArray, DRGN_ARRAYSIZE(leftWallArray), Material(glm::vec3(0.0f, 0.0f, 1.0f)));
-    Mesh rightWall(rightWallArray, DRGN_ARRAYSIZE(rightWallArray), Material(glm::vec3(0.0f, 1.0f, 0.0f)));
-    Mesh topWall(topWallArray, DRGN_ARRAYSIZE(topWallArray), Material(glm::vec3(1.0f, 1.0f, 1.0f)));
-    Mesh bottomWall(bottomWallArray, DRGN_ARRAYSIZE(bottomWallArray), Material(glm::vec3(1.0f, 1.0f, 1.0f)));
-    Mesh frontWall(frontWallArray, DRGN_ARRAYSIZE(frontWallArray), Material(glm::vec3(1.0f, 1.0f, 1.0f)));
+    
+    float const lightHeight = 0.95f * size;
+    float const lightSize = 0.3f * size;
+
+    glm::vec3 lightArray[] = {
+        glm::vec3(lightSize, lightHeight,  lightSize), glm::vec3(-lightSize, lightHeight,  lightSize), glm::vec3(-lightSize, lightHeight, -lightSize),
+        glm::vec3(-lightSize, lightHeight, -lightSize), glm::vec3(lightSize, lightHeight, -lightSize), glm::vec3(lightSize, lightHeight,  lightSize)
+    };
+
+    Mesh backWall(backWallArray, DRGN_ARRAYSIZE(backWallArray), DiffuseMaterial(glm::vec3(1.0f, 1.0f, 1.0f)));
+    Mesh leftWall(leftWallArray, DRGN_ARRAYSIZE(leftWallArray), DiffuseMaterial(glm::vec3(0.0f, 0.0f, 1.0f)));
+    Mesh rightWall(rightWallArray, DRGN_ARRAYSIZE(rightWallArray), DiffuseMaterial(glm::vec3(0.0f, 1.0f, 0.0f)));
+    Mesh topWall(topWallArray, DRGN_ARRAYSIZE(topWallArray), DiffuseMaterial(glm::vec3(1.0f, 1.0f, 1.0f)));
+    Mesh bottomWall(bottomWallArray, DRGN_ARRAYSIZE(bottomWallArray), DiffuseMaterial(glm::vec3(1.0f, 1.0f, 1.0f)));
+    Mesh frontWall(frontWallArray, DRGN_ARRAYSIZE(frontWallArray), DiffuseMaterial(glm::vec3(1.0f, 1.0f, 1.0f)));
+    Mesh light(lightArray, DRGN_ARRAYSIZE(frontWallArray), EmissiveMaterial(glm::vec3(1.0f, 1.0f, 1.0f)));
 
     ObjectGraph scene;
+    scene.Add(light);
     scene.Add(sphere);
     scene.Add(backWall);
     scene.Add(leftWall);

@@ -3,11 +3,26 @@
 
 #include "glm/glm.hpp"
 
-struct Material
+class Material
 {
-    Material(glm::vec3 const& albedo) : Albedo(albedo) {}
+protected:
+    Material(glm::vec3 const& albedo, glm::vec3 const& emissive) : Albedo(albedo), Emissive(emissive) {}
 
+public:
     glm::vec3 Albedo;
+    glm::vec3 Emissive;
+};
+
+class DiffuseMaterial : public Material
+{
+public:
+    DiffuseMaterial(glm::vec3 const& albedo) : Material(albedo, glm::vec3(0, 0, 0)) {}
+};
+
+class EmissiveMaterial : public Material
+{
+public:
+    EmissiveMaterial(glm::vec3 const& emissiveColor) : Material(glm::vec3(0, 0, 0), emissiveColor) {}
 };
 
 #endif
