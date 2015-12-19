@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <stdint.h>
+#include <cstdlib>
 
 #ifndef DRGN_ASSERT
 #define DRGN_ASSERT(x) assert(x)
@@ -26,15 +27,20 @@ namespace drgn
 {
 
 template<typename T>
-inline T clamp(T value, T min, T max)
+inline T Clamp(T value, T min, T max)
 {
     DRGN_ASSERT(min <= max);
     return value < min ? min : (value > max ? max : value);
 }
 
-inline uint8_t float32ToUint8(float value)
+inline uint8_t Float32ToUint8(float value)
 {
-    return static_cast<uint8_t>(drgn::clamp(255.f * value, 0.f, 255.f));
+    return static_cast<uint8_t>(drgn::Clamp(255.f * value, 0.f, 255.f));
+}
+
+inline float GenerateRandom(float min, float max)
+{
+    return (max - min) * float(std::rand()) / float(RAND_MAX) + min;
 }
 
 }

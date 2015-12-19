@@ -28,9 +28,9 @@ glm::u8vec4 SampleRay(Ray const& ray, Object const& scene)
         const auto& albedo = intersection.GetMaterial()->Albedo;
 
         glm::u8vec4 color;
-        color.r = drgn::float32ToUint8(albedo.r);
-        color.g = drgn::float32ToUint8(albedo.g);
-        color.b = drgn::float32ToUint8(albedo.b);
+        color.r = drgn::Float32ToUint8(albedo.r);
+        color.g = drgn::Float32ToUint8(albedo.g);
+        color.b = drgn::Float32ToUint8(albedo.b);
         color.a = 255;
 
         return color;
@@ -120,32 +120,17 @@ int main(int argc, char** argv)
     auto const imageCoordSystem = camera.GetScreenSpaceCoordinateSystem();
     auto const xPixelVec = imageCoordSystem.X / float(Width);
     auto const yPixelVec = imageCoordSystem.Y / float(Height);
-    auto const imageOrigin = imageCoordSystem.Origin + 0.5f * xPixelVec + 0.5f * yPixelVec;
+    auto const imageOrigin = imageCoordSystem.Origin;
 
     auto const cameraOrigin = camera.GetPosition();
 
-    for (int y = 0; y < Height; y++)
-    {
-        for (int x = 0; x < Width; x++)
-        {
-            auto samplePosition = imageOrigin + float(x) * xPixelVec + float(y) * yPixelVec;
-            Ray  ray(cameraOrigin, samplePosition - cameraOrigin);
-            auto color = SampleRay(ray, scene);
-            int offset = (y * Width + x) * 4;
-
-            data[offset + 0] = color.r;
-            data[offset + 1] = color.g;
-            data[offset + 2] = color.b;
-            data[offset + 3] = 255;
-        }
-    }
 
     sf::Texture texture;
     texture.create(Width, Height);
-    texture.update(&data[0]);
 
     sf::Sprite sprite(texture);
 
+    int sampleCount = 0;
     // Start the game loop
     while (window.isOpen())
     {
@@ -158,10 +143,32 @@ int main(int argc, char** argv)
                 window.close();
         }
 
+        for (int y = 0; y < Height; y++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                float const rayX = drgn::GenerateRandom(float(x), float(x + 1));
+                float const rayY = drgn::GenerateRandom(float(y), float(y + 1));
+                auto rayPosition = imageOrigin + rayX * xPixelVec + rayY * yPixelVec;
+                Ray  ray(cameraOrigin, rayPosition - cameraOrigin);
+                auto color = SampleRay(ray, scene);
+
+                int const offset = (y * Width + x) * 4;
+                int sampleCountPlusOne = sampleCount + 1;
+                data[offset + 0] = uint8_t((sampleCount * int(data[offset + 0]) + int(color.r)) / (sampleCountPlusOne));
+                data[offset + 1] = uint8_t((sampleCount * int(data[offset + 1]) + int(color.g)) / (sampleCountPlusOne));
+                data[offset + 2] = uint8_t((sampleCount * int(data[offset + 2]) + int(color.b)) / (sampleCountPlusOne));
+                data[offset + 3] = 255;
+            }
+        }
+
+        texture.update(&data[0]);
         window.draw(sprite);
 
         // Update the window
         window.display();
+
+        sampleCount += 1;
     }
 
     return 0;
