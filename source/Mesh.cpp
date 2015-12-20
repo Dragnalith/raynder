@@ -20,7 +20,7 @@ bool triangle_intersection(Ray const&ray, glm::vec3 const&p0, glm::vec3 const& p
     glm::vec3 const e0 = p1 - p0;
     glm::vec3 const e1 = p2 - p0;
 
-    glm::vec3 const d = ray.GetDirection();
+    glm::vec3 const& d = ray.GetDirection();
 
     glm::vec3 const P = glm::cross(d, e1);
     float const det = glm::dot(P, e0);

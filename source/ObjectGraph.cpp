@@ -24,8 +24,7 @@ bool ObjectGraph::Intersect(Ray const& ray, Intersection* pIntersection) const
             continue;
         }
 
-        float distance = intersection.GetDistance();
-        if (distance >= 0 && distance < neareast_intersection.GetDistance())
+        if (intersection.GetDistance() >= 0 && intersection.GetDistance() < neareast_intersection.GetDistance())
         {
             neareast_intersection = intersection;
         }
