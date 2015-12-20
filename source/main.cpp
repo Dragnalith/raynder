@@ -17,6 +17,8 @@
 
 #include <cmath>
 #include <iostream>
+#include <chrono>
+#include <iomanip>
 
 int const Width = 700;
 int const Height = 700;
@@ -49,13 +51,6 @@ void OrthonormalBase(glm::vec3 const& v1, glm::vec3& v2, glm::vec3& v3) {
         v2 = glm::vec3(0.0f, v1.z * invLen, -v1.y * invLen);
     }
     v3 = glm::cross(v1, v2);
-
-    DRGN_ASSERT_UNIT_VECTOR(v1);
-    DRGN_ASSERT_UNIT_VECTOR(v2);
-    DRGN_ASSERT_UNIT_VECTOR(v3);
-    DRGN_ASSERT_ALMOST_ZERO(glm::dot(v1, v2));
-    DRGN_ASSERT_ALMOST_ZERO(glm::dot(v1, v3));
-    DRGN_ASSERT_ALMOST_ZERO(glm::dot(v2, v3));
 }
 
 glm::vec3 RandomHemisphericalDirection(glm::vec3 const& normal)
@@ -78,7 +73,7 @@ glm::vec3 RandomHemisphericalDirection(glm::vec3 const& normal)
 
     DRGN_ASSERT_UNIT_VECTOR(finalDir);
     float const dot = glm::dot(finalDir, N); 
-    DRGN_ASSERT(dot >= 0.0f);
+    DRGN_ASSERT(dot >= -0.00001f);
 
         return finalDir;
 }
@@ -202,6 +197,7 @@ int main(int argc, char** argv)
     // Start the game loop
     while (window.isOpen())
     {
+        auto start = std::chrono::steady_clock::now();
         // Process events
         sf::Event event;
         while (window.pollEvent(event))
@@ -210,6 +206,8 @@ int main(int argc, char** argv)
             if (event.type == sf::Event::Closed)
                 window.close();
         }
+
+        auto t1 = std::chrono::steady_clock::now();
 
         for (int y = 0; y < Height; y++)
         {
@@ -230,15 +228,30 @@ int main(int argc, char** argv)
             }
         }
 
+        auto t2 = std::chrono::steady_clock::now();
+
         DoToneMapping(Width, Height, data.data(), pixelData.data());
+
+        auto t3 = std::chrono::steady_clock::now();
 
         texture.update(&pixelData[0]);
         window.draw(sprite);
+
+        auto t4 = std::chrono::steady_clock::now();
+
 
         // Update the window
         window.display();
 
         sampleCount += 1;
+
+        auto end = std::chrono::steady_clock::now();
+
+        std::cout << "total: "          << std::fixed << std::setprecision(4) << std::chrono::duration <double, std::milli>(end - start).count() << "ms, ";
+        std::cout << "integration: "    << std::fixed << std::setprecision(4) << std::chrono::duration <double, std::milli>(t2 - t1).count() << "ms, ";
+        std::cout << "tone mapping: "   << std::fixed << std::setprecision(4) << std::chrono::duration <double, std::milli>(t3 - t2).count() << "ms, ";
+        std::cout << "update texture: " << std::fixed << std::setprecision(4) << std::chrono::duration <double, std::milli>(t4 - t3).count() << "ms, ";
+        std::cout << "swap buffer: "    << std::fixed << std::setprecision(4) << std::chrono::duration <double, std::milli>(end - t4).count() << "ms\n";
     }
 
     return 0;
