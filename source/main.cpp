@@ -19,6 +19,7 @@
 #include <iostream>
 #include <chrono>
 #include <iomanip>
+#include <omp.h>
 
 int const Width = 700;
 int const Height = 700;
@@ -209,6 +210,7 @@ int main(int argc, char** argv)
 
         auto t1 = std::chrono::steady_clock::now();
 
+        #pragma omp parallel for schedule(dynamic)
         for (int y = 0; y < Height; y++)
         {
             for (int x = 0; x < Width; x++)
