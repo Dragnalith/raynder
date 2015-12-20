@@ -60,7 +60,7 @@ bool Sphere::Intersect(Ray const& ray, Intersection* pIntersection) const
         return false;
     }
 
-    glm::vec3 const position = ray.GetOrigin() + distance * ray.GetDirection();
+    glm::vec3 const position = ray.GetPoint(distance);
     glm::vec3 const normal   = position - m_Center;
 
     if (glm::dot(normal, ray.GetDirection()) < 0)

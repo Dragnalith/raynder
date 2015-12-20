@@ -19,3 +19,8 @@ glm::vec3 const& Ray::GetOrigin() const
 {
     return m_Origin;
 }
+
+glm::vec3 Ray::GetPoint(float const distance) const
+{
+    return m_Origin + distance * m_Direction;
+}

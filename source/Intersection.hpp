@@ -12,6 +12,7 @@ public:
     Intersection(float const distance, glm::vec3 const& normal, Material const* pMaterial);
     Material const* GetMaterial() const;
     float           GetDistance() const;
+    glm::vec3 const& GetNormal() const;
     bool            HasIntersection() const;
 
 private:

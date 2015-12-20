@@ -84,6 +84,10 @@ bool Mesh::Intersect(Ray const& ray, Intersection* pIntersection) const
         {
             nearest_distance = distance;
             normal = glm::cross(p1 - p0, p2 - p0);
+            if (glm::dot(normal, ray.GetDirection()) > 0)
+            {
+                normal *= -1.0f;
+            }
         }
     }
     

@@ -10,6 +10,7 @@ public:
     
     glm::vec3 const& GetDirection() const;
     glm::vec3 const& GetOrigin() const;
+    glm::vec3 GetPoint(float distance) const;
 
 private:
     glm::vec3 m_Origin;

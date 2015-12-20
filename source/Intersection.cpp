@@ -8,9 +8,9 @@ Intersection::Intersection()
 
 Intersection::Intersection(float distance, glm::vec3 const& normal, Material const* pMaterial)
     : m_Distance(distance)
-    , m_Normal(normal)
     , m_pMaterial(pMaterial)
 {
+    m_Normal = glm::normalize(normal);
 }
 
 Material const* Intersection::GetMaterial() const
@@ -22,6 +22,12 @@ float Intersection::GetDistance() const
 {
     return m_Distance;
 }
+
+glm::vec3 const& Intersection::GetNormal() const
+{
+    return m_Normal;
+}
+
 
 bool Intersection::HasIntersection() const
 {

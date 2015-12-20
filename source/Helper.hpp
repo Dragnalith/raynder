@@ -13,6 +13,14 @@
 #define DRGN_ASSERT_NOT_IMPLEMENTED() DRGN_ASSERT(false)
 #endif // DRGN_ASSERT_NOT_IMPLEMENTED
 
+#ifndef DRGN_ASSERT_UNIT_VECTOR
+#define DRGN_ASSERT_UNIT_VECTOR(x) DRGN_ASSERT(0.9999f < glm::length(x) && glm::length(x) < 1.0001f)
+#endif
+
+#ifndef DRGN_ASSERT_ALMOST_ZERO
+#define DRGN_ASSERT_ALMOST_ZERO(x) DRGN_ASSERT(-0.0001f < x && x < 0.0001f)
+#endif
+
 #ifndef DRGN_ARRAYSIZE
 namespace
 {
@@ -25,6 +33,8 @@ char(&ArraySizeHelper(T(&t)[N]))[N];
 
 namespace drgn
 {
+
+float const Pi = 3.14159265358979323846f;
 
 template<typename T>
 inline T Clamp(T value, T min, T max)
@@ -44,5 +54,7 @@ inline float GenerateRandom(float min, float max)
 }
 
 }
+
+
 
 #endif
