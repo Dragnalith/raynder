@@ -81,7 +81,7 @@ glm::vec3 RandomHemisphericalDirection(glm::vec3 const& normal)
 
 glm::vec3 Radiance(Ray const& ray, Object const& scene, int depth)
 {
-    if (depth > 3)
+    if (depth > 10)
     {
         return glm::vec3(0.f, 0.f, 0.f);
     }
@@ -106,6 +106,8 @@ glm::vec3 Radiance(Ray const& ray, Object const& scene, int depth)
 
 int main(int argc, char** argv)
 {
+    srand((unsigned int)time(NULL));
+
     glm::vec3 const CameraPosition(0.f, 0.f, 4.f);
     glm::vec3 const CameraFront(0.f, 0.f, -1.f);
     glm::vec3 const CameraUp(0.f, 1.f, 0.f);
@@ -195,6 +197,8 @@ int main(int argc, char** argv)
     sf::Sprite sprite(texture);
 
     int sampleCount = 0;
+    double timeTotal = 0.0;
+    double timeCount = 0;
     // Start the game loop
     while (window.isOpen())
     {
@@ -249,7 +253,9 @@ int main(int argc, char** argv)
 
         auto end = std::chrono::steady_clock::now();
 
-        std::cout << "total: "          << std::fixed << std::setprecision(4) << std::chrono::duration <double, std::milli>(end - start).count() << "ms, ";
+        timeTotal += std::chrono::duration <double, std::milli>(end - start).count();
+        timeCount += 1;
+        std::cout << "total avg: "      << std::fixed << std::setprecision(4) << timeTotal / double(timeCount) << "ms, ";
         std::cout << "integration: "    << std::fixed << std::setprecision(4) << std::chrono::duration <double, std::milli>(t2 - t1).count() << "ms, ";
         std::cout << "tone mapping: "   << std::fixed << std::setprecision(4) << std::chrono::duration <double, std::milli>(t3 - t2).count() << "ms, ";
         std::cout << "update texture: " << std::fixed << std::setprecision(4) << std::chrono::duration <double, std::milli>(t4 - t3).count() << "ms, ";

@@ -28,7 +28,6 @@ set(RAYNEDER_SOURCES
 add_executable("Raynder" ${RAYNEDER_SOURCES})
 target_link_libraries("Raynder" sfml-graphics sfml-window sfml-system)
 
-
 if(${MSVC})
     add_custom_command(TARGET Raynder
           POST_BUILD
