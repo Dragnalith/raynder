@@ -258,6 +258,7 @@ int main(int argc, char** argv)
 
         timeTotal += std::chrono::duration <double, std::milli>(end - start).count();
         timeCount += 1;
+        std::cout << "sample count: "   << std::fixed << std::setprecision(4) << sampleCount << ", ";
         std::cout << "total avg: "      << std::fixed << std::setprecision(4) << timeTotal / double(timeCount) << "ms, ";
         std::cout << "integration: "    << std::fixed << std::setprecision(4) << std::chrono::duration <double, std::milli>(t2 - t1).count() << "ms, ";
         std::cout << "tone mapping: "   << std::fixed << std::setprecision(4) << std::chrono::duration <double, std::milli>(t3 - t2).count() << "ms, ";
