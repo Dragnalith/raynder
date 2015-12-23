@@ -4,6 +4,7 @@
 #include <cassert>
 #include <stdint.h>
 #include <cstdlib>
+#include <random>
 
 #ifndef DRGN_ASSERT
 #define DRGN_ASSERT(x) assert(x)
@@ -48,16 +49,20 @@ inline uint8_t Float32ToUint8(float value)
     return static_cast<uint8_t>(drgn::Clamp(255.f * value, 0.f, 255.f));
 }
 
-inline float GenerateRandomFloat(float min, float max)
-{
-    DRGN_ASSERT(min < max);
-    return (max - min) * float(std::rand()) / float(RAND_MAX) + min;
-}
+extern std::random_device Random;
+extern std::mt19937 PseudoRandom;
+extern std::uniform_real_distribution<float> UniformUnitFloatDistribution;
 
+inline float GenerateRandomUnitFloat()
+{
+    return UniformUnitFloatDistribution(PseudoRandom);
+}
 inline float GenerateRandomInteger(int min, int max)
 {
     DRGN_ASSERT(min < max);
-    return min + std::rand() % (max - min);
+    std::uniform_int_distribution<int> randomInt(min, max);
+
+    return randomInt(PseudoRandom);
 }
 
 }

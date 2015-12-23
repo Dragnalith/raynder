@@ -51,7 +51,8 @@ glm::vec3 ObjectGraph::SampleLight(glm::vec3 const& position) const
 {
     DRGN_ASSERT(m_EmissiveObjects.size() > 0);
 
-    size_t objectIdx = drgn::GenerateRandomInteger(0, m_EmissiveObjects.size());
+    size_t objectIdx = drgn::GenerateRandomInteger(0, m_EmissiveObjects.size() - 1);
+
     Object const* pObject = m_EmissiveObjects[objectIdx];
     glm::vec3 sample = pObject->SampleUniform();
     Ray ray(position, glm::normalize(sample - position));

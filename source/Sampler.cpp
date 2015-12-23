@@ -29,8 +29,8 @@ glm::vec3 Sampler::SphericalDirection()
 glm::vec3 Sampler::HemisphericalDirection(glm::vec3 const& normal)
 {
     glm::vec3 const N = glm::normalize(normal);
-    float const u1 = drgn::GenerateRandomFloat(0.0f, 1.0f);
-    float const u2 = drgn::GenerateRandomFloat(0.0f, 1.0f);
+    float const u1 = drgn::GenerateRandomUnitFloat();
+    float const u2 = drgn::GenerateRandomUnitFloat();
     float const r = sqrt(1.0f - u1 * u1);
     float const theta = 2 * drgn::Pi * u2;
 

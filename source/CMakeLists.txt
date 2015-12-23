@@ -21,6 +21,7 @@ set(RAYNEDER_SOURCES
     "Object.hpp"
     "Object.cpp"
     "Helper.hpp"
+    "Helper.cpp"
     "Mesh.hpp"
     "Mesh.cpp"
     "Sampler.hpp"

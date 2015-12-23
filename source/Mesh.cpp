@@ -120,7 +120,7 @@ float Mesh::Surface() const
 glm::vec3 Mesh::SampleUniform() const
 {
     float surface = Mesh::Surface();
-    float const s = drgn::GenerateRandomFloat(0, surface);
+    float const s = surface * drgn::GenerateRandomUnitFloat();
 
     glm::vec3 const* p0;
     glm::vec3 const* p1;
@@ -140,8 +140,8 @@ glm::vec3 Mesh::SampleUniform() const
         }
     }
 
-    float u = drgn::GenerateRandomFloat(0.0f, 1.0f);
-    float v = drgn::GenerateRandomFloat(0.0f, 1.0f);
+    float u = drgn::GenerateRandomUnitFloat();
+    float v = drgn::GenerateRandomUnitFloat();
 
     if ((u + v) > 1.0f)
     {
