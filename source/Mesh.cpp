@@ -80,7 +80,7 @@ bool Mesh::Intersect(Ray const& ray, Intersection* pIntersection) const
             continue;
         }
 
-        if (distance >= 0 && distance < nearest_distance)
+        if (distance >= 0.0001f && distance < nearest_distance)
         {
             nearest_distance = distance;
             normal = glm::cross(p1 - p0, p2 - p0);

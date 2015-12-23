@@ -73,7 +73,7 @@ glm::vec3 RandomHemisphericalDirection(glm::vec3 const& normal)
     glm::vec3 finalDir = dir.x * X + dir.y * Y + dir.z * N;
 
     DRGN_ASSERT_UNIT_VECTOR(finalDir);
-    float const dot = glm::dot(finalDir, N); 
+    float const dot = glm::dot(finalDir, N);
     DRGN_ASSERT(dot >= -0.00001f);
 
         return finalDir;
@@ -97,9 +97,9 @@ glm::vec3 Radiance(Ray const& ray, ObjectGraph const& scene, int depth)
         auto point = ray.GetPoint(intersection.GetDistance());
         Ray nextRay(point, dir);
 
-        glm::vec3 const indirect = Radiance(nextRay, scene, depth + 1) ;
-        glm::vec3 const direct = scene.SampleLight(point);
-        return pMaterial->Albedo * (direct + indirect) * glm::dot(dir, intersection.GetNormal()) / (2 * drgn::Pi);
+        glm::vec3 const radiance = Radiance(nextRay, scene, depth + 1) ;
+        //glm::vec3 const direct = scene.SampleLight(point);
+        return pMaterial->Emissive + pMaterial->Albedo * radiance * glm::dot(dir, intersection.GetNormal());
     }
     else
     {
@@ -153,7 +153,7 @@ int main(int argc, char** argv)
         glm::vec3( size, size,  size), glm::vec3(-size, size,  size), glm::vec3(-size, size, -size),
         glm::vec3(-size, size, -size), glm::vec3( size, size, -size), glm::vec3( size, size,  size)
     };
-    
+
     float const lightHeight = 0.95f * size;
     float const lightSize = 0.3f * size;
 
@@ -168,7 +168,7 @@ int main(int argc, char** argv)
     Mesh topWall(topWallArray, DRGN_ARRAYSIZE(topWallArray), DiffuseMaterial(glm::vec3(1.0f, 1.0f, 1.0f)));
     Mesh bottomWall(bottomWallArray, DRGN_ARRAYSIZE(bottomWallArray), DiffuseMaterial(glm::vec3(1.0f, 1.0f, 1.0f)));
     Mesh frontWall(frontWallArray, DRGN_ARRAYSIZE(frontWallArray), DiffuseMaterial(glm::vec3(1.0f, 1.0f, 1.0f)));
-    Mesh light(lightArray, DRGN_ARRAYSIZE(frontWallArray), EmissiveMaterial(glm::vec3(40.0f, 40.0f, 40.0f)));
+    Mesh light(lightArray, DRGN_ARRAYSIZE(frontWallArray), EmissiveMaterial(glm::vec3(10.0f, 10.0f, 10.0f)));
 
     ObjectGraph scene;
     scene.Add(light);

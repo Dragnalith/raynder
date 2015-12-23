@@ -40,11 +40,15 @@ bool sphere_intersection(Ray const&ray, glm::vec3 const&O, float const R, float*
     }
 
     float const delta_sqrt = sqrt(delta);
-    
+    float constexpr epsilon = 0.0001f;
     *pDistance = -B - delta_sqrt;
-    if (*pDistance < 0)
+    if (*pDistance < epsilon)
     {
         *pDistance = -B + delta_sqrt;
+        if (*pDistance < epsilon)
+        {
+            return false;
+        }
     }
 
     return true;
