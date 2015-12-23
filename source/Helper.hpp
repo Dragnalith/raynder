@@ -48,9 +48,16 @@ inline uint8_t Float32ToUint8(float value)
     return static_cast<uint8_t>(drgn::Clamp(255.f * value, 0.f, 255.f));
 }
 
-inline float GenerateRandom(float min, float max)
+inline float GenerateRandomFloat(float min, float max)
 {
+    DRGN_ASSERT(min < max);
     return (max - min) * float(std::rand()) / float(RAND_MAX) + min;
+}
+
+inline float GenerateRandomInteger(int min, int max)
+{
+    DRGN_ASSERT(min < max);
+    return min + std::rand() % (max - min);
 }
 
 }

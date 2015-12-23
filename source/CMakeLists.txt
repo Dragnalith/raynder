@@ -23,6 +23,8 @@ set(RAYNEDER_SOURCES
     "Helper.hpp"
     "Mesh.hpp"
     "Mesh.cpp"
+    "Sampler.hpp"
+    "Sampler.cpp"
 )
 
 add_executable("Raynder" ${RAYNEDER_SOURCES})

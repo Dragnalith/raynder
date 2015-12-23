@@ -14,10 +14,11 @@ public:
     Mesh(glm::vec3 const* vertexBuffer, size_t size, Material const& material);
 
     bool Intersect(Ray const& ray, Intersection* pIntersection) const override;
+    float Surface() const override;
+    glm::vec3 SampleUniform() const override;
 
 private:
     std::vector<glm::vec3> m_VertexBuffer;
-    Material               m_Material;
 
 };
 #endif

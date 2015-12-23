@@ -5,8 +5,8 @@
 #include "Intersection.hpp"
 
 Mesh::Mesh(glm::vec3 const* vertexBuffer, size_t size, Material const& material)
-    : m_VertexBuffer(vertexBuffer, vertexBuffer + size)
-    , m_Material(material)
+    : Object(material)
+    , m_VertexBuffer(vertexBuffer, vertexBuffer + size)
 {
     DRGN_ASSERT(m_VertexBuffer.size() % 3 == 0);
 }
@@ -96,7 +96,62 @@ bool Mesh::Intersect(Ray const& ray, Intersection* pIntersection) const
         return false;
     }
 
-    *pIntersection = Intersection(nearest_distance, normal, &m_Material);
+    *pIntersection = Intersection(nearest_distance, normal, this);
 
     return true;
 }
+
+float Mesh::Surface() const
+{
+    float surface = 0.0f;
+
+    for (size_t i = 0; i < m_VertexBuffer.size(); i += 3)
+    {
+        glm::vec3 const& p0 = m_VertexBuffer[i];
+        glm::vec3 const& p1 = m_VertexBuffer[i + 1];
+        glm::vec3 const& p2 = m_VertexBuffer[i + 2];
+
+        surface += 0.5f + glm::length(glm::cross(p1 - p0, p2 - p0));
+    }
+
+    return surface;
+}
+
+glm::vec3 Mesh::SampleUniform() const
+{
+    float surface = Mesh::Surface();
+    float const s = drgn::GenerateRandomFloat(0, surface);
+
+    glm::vec3 const* p0;
+    glm::vec3 const* p1;
+    glm::vec3 const* p2;
+    float surfaceAcc = 0.0f;
+    for (size_t i = 0; i < m_VertexBuffer.size(); i += 3)
+    {
+        p0 = &m_VertexBuffer[i];
+        p1 = &m_VertexBuffer[i + 1];
+        p2 = &m_VertexBuffer[i + 2];
+
+        surfaceAcc += 0.5f + glm::length(glm::cross(*p1 - *p0, *p2 - *p0));
+
+        if (s < surfaceAcc)
+        {
+            break;
+        }
+    }
+
+    float u = drgn::GenerateRandomFloat(0.0f, 1.0f);
+    float v = drgn::GenerateRandomFloat(0.0f, 1.0f);
+
+    if ((u + v) > 1.0f)
+    {
+        u = 1 - u;
+        v = 1 - v;
+    }
+
+    glm::vec3 const e0 = *p1 - *p0;
+    glm::vec3 const e1 = *p2 - *p0;
+
+    return *p0 + u * e0 + v * e1;
+}
+

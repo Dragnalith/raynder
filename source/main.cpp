@@ -57,8 +57,8 @@ void OrthonormalBase(glm::vec3 const& v1, glm::vec3& v2, glm::vec3& v3) {
 glm::vec3 RandomHemisphericalDirection(glm::vec3 const& normal)
 {
     glm::vec3 const N = glm::normalize(normal);
-    float const u1 = drgn::GenerateRandom(0.0f, 1.0f);
-    float const u2 = drgn::GenerateRandom(0.0f, 1.0f);
+    float const u1 = drgn::GenerateRandomFloat(0.0f, 1.0f);
+    float const u2 = drgn::GenerateRandomFloat(0.0f, 1.0f);
     float const r = sqrt(1.0f - u1 * u1);
     float const theta = 2 * drgn::Pi * u2;
 
@@ -79,7 +79,7 @@ glm::vec3 RandomHemisphericalDirection(glm::vec3 const& normal)
         return finalDir;
 }
 
-glm::vec3 Radiance(Ray const& ray, Object const& scene, int depth)
+glm::vec3 Radiance(Ray const& ray, ObjectGraph const& scene, int depth)
 {
     if (depth > 10)
     {
@@ -94,9 +94,12 @@ glm::vec3 Radiance(Ray const& ray, Object const& scene, int depth)
         Material const* pMaterial = intersection.GetMaterial();
 
         auto dir = RandomHemisphericalDirection(intersection.GetNormal());
-        Ray nextRay(ray.GetPoint(intersection.GetDistance()), dir);
+        auto point = ray.GetPoint(intersection.GetDistance());
+        Ray nextRay(point, dir);
 
-        return pMaterial->Emissive + pMaterial->Albedo * Radiance(nextRay, scene, depth + 1) * glm::dot(dir, intersection.GetNormal());
+        glm::vec3 const indirect = Radiance(nextRay, scene, depth + 1) ;
+        glm::vec3 const direct = scene.SampleLight(point);
+        return pMaterial->Albedo * (direct + indirect) * glm::dot(dir, intersection.GetNormal()) / (2 * drgn::Pi);
     }
     else
     {
@@ -219,8 +222,8 @@ int main(int argc, char** argv)
         {
             for (int x = 0; x < Width; x++)
             {
-                float const rayX = drgn::GenerateRandom(float(x), float(x + 1));
-                float const rayY = drgn::GenerateRandom(float(y), float(y + 1));
+                float const rayX = drgn::GenerateRandomFloat(float(x), float(x + 1));
+                float const rayY = drgn::GenerateRandomFloat(float(y), float(y + 1));
                 auto rayPosition = imageOrigin + rayX * xPixelVec + rayY * yPixelVec;
                 Ray  ray(cameraOrigin, rayPosition - cameraOrigin);
 

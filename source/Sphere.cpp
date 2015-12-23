@@ -5,10 +5,12 @@
 
 #include "glm/glm.hpp"
 
+#include "Sampler.hpp"
+
 Sphere::Sphere(glm::vec3 const& center, float const radius, Material const& material)
-    : m_Center(center)
+    : Object(material)
+    , m_Center(center)
     , m_Radius(radius)
-    , m_Material(material)
 {
 }
 
@@ -65,12 +67,22 @@ bool Sphere::Intersect(Ray const& ray, Intersection* pIntersection) const
 
     if (glm::dot(normal, ray.GetDirection()) < 0)
     {
-        *pIntersection = Intersection(distance, normal, &m_Material);
+        *pIntersection = Intersection(distance, normal, this);
     } 
     else
     {
-        *pIntersection = Intersection(distance, -normal, &m_Material);
+        *pIntersection = Intersection(distance, -normal, this);
     }
 
     return true;
+}
+
+float Sphere::Surface() const
+{
+    return 4 * drgn::Pi * m_Radius;
+}
+
+glm::vec3 Sphere::SampleUniform() const
+{
+    return m_Radius * Sampler::SphericalDirection() + m_Center;
 }

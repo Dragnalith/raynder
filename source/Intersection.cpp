@@ -6,9 +6,9 @@ Intersection::Intersection()
 {
 }
 
-Intersection::Intersection(float distance, glm::vec3 const& normal, Material const* pMaterial)
+Intersection::Intersection(float distance, glm::vec3 const& normal, Object const* pObject)
     : m_Distance(distance)
-    , m_pMaterial(pMaterial)
+    , m_pObject(pObject)
 {
     m_Normal = glm::normalize(normal);
 }
