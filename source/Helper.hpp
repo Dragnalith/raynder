@@ -46,7 +46,7 @@ inline T Clamp(T value, T min, T max)
 
 inline uint8_t Float32ToUint8(float value)
 {
-    return static_cast<uint8_t>(drgn::Clamp(255.f * value, 0.f, 255.f));
+    return static_cast<uint8_t>(255.f * std::powf(drgn::Clamp(value, 0.f, 1.0f), 1.0f/2.2f));
 }
 
 extern std::random_device Random;
