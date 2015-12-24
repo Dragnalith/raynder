@@ -49,7 +49,6 @@ inline uint8_t Float32ToUint8(float value)
     return static_cast<uint8_t>(255.f * std::powf(drgn::Clamp(value, 0.f, 1.0f), 1.0f/2.2f));
 }
 
-extern std::random_device Random;
 extern std::mt19937 PseudoRandom;
 extern std::uniform_real_distribution<float> UniformUnitFloatDistribution;
 
@@ -57,7 +56,7 @@ inline float GenerateRandomUnitFloat()
 {
     return UniformUnitFloatDistribution(PseudoRandom);
 }
-inline float GenerateRandomInteger(int min, int max)
+inline int GenerateRandomInteger(int min, int max)
 {
     DRGN_ASSERT(min < max);
     std::uniform_int_distribution<int> randomInt(min, max);

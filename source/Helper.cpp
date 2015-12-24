@@ -2,7 +2,6 @@
 
 namespace drgn
 {
-    std::random_device Random;
-    std::mt19937 PseudoRandom(Random());
-    std::uniform_real_distribution<float> UniformUnitFloatDistribution(0.0f, std::nextafter(1.0f, 2.0f));
+    std::mt19937 PseudoRandom(666);
+    std::uniform_real_distribution<float> UniformUnitFloatDistribution(0.0f, 1.0f);
 }
