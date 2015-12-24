@@ -109,8 +109,6 @@ glm::vec3 Radiance(Ray const& ray, ObjectGraph const& scene, int depth)
 
 int main(int argc, char** argv)
 {
-    srand((unsigned int)time(NULL));
-
     glm::vec3 const CameraPosition(0.f, 0.f, 4.f);
     glm::vec3 const CameraFront(0.f, 0.f, -1.f);
     glm::vec3 const CameraUp(0.f, 1.f, 0.f);
