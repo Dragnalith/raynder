@@ -33,6 +33,13 @@ void DoToneMapping(int width, int height, float const* pDataIn, uint8_t* pDataOu
             int const inOffset = (y * width + x) * 3;
             int const outOffset = (y * width + x) * 4;
 
+            DRGN_ASSERT(!std::isnan(pDataIn[inOffset + 0]));
+            DRGN_ASSERT(!std::isnan(pDataIn[inOffset + 1]));
+            DRGN_ASSERT(!std::isnan(pDataIn[inOffset + 2]));
+            DRGN_ASSERT(!std::isinf(pDataIn[inOffset + 0]));
+            DRGN_ASSERT(!std::isinf(pDataIn[inOffset + 1]));
+            DRGN_ASSERT(!std::isinf(pDataIn[inOffset + 2]));
+
             pDataOut[outOffset + 0] = drgn::Float32ToUint8(pDataIn[inOffset + 0]);
             pDataOut[outOffset + 1] = drgn::Float32ToUint8(pDataIn[inOffset + 1]);
             pDataOut[outOffset + 2] = drgn::Float32ToUint8(pDataIn[inOffset + 2]);
@@ -79,15 +86,15 @@ glm::vec3 RandomHemisphericalDirection(glm::vec3 const& normal)
         return finalDir;
 }
 
+float MaxComponent(glm::vec3 const& vec)
+{
+    return std::max(vec.x, std::max(vec.y, vec.z));
+}
+
 glm::vec3 Radiance(Ray const& ray, ObjectGraph const& scene, int depth)
 {
-    if (depth > 10)
-    {
-        return glm::vec3(0.f, 0.f, 0.f);
-    }
-
     Intersection intersection;
-    auto result = scene.Intersect(ray, &intersection);
+    bool result = scene.Intersect(ray, &intersection);
 
     if (result)
     {
@@ -97,9 +104,21 @@ glm::vec3 Radiance(Ray const& ray, ObjectGraph const& scene, int depth)
         auto point = ray.GetPoint(intersection.GetDistance());
         Ray nextRay(point, dir);
 
-        glm::vec3 const radiance = Radiance(nextRay, scene, depth + 1) ;
-        //glm::vec3 const direct = scene.SampleLight(point);
-        return pMaterial->Emissive + pMaterial->Albedo * radiance * glm::dot(dir, intersection.GetNormal());
+        auto radiance = pMaterial->Emissive;
+
+        float constexpr pMin = 0.01f;
+        float const albedoMax = MaxComponent(pMaterial->Albedo);
+        float const cosTheta = glm::dot(dir, intersection.GetNormal());
+        float const u = drgn::GenerateRandomUnitFloat();
+        float const p = (depth <= 1) ? 1.0f : std::max(pMin, std::min(1.0f, cosTheta * albedoMax));
+        DRGN_ASSERT(p >= pMin && p <= 1.0f);
+        float const invP = 1.0f / p;
+        if (u < p)
+        {
+            radiance += invP * pMaterial->Albedo * Radiance(nextRay, scene, depth + 1) * cosTheta;
+        }
+
+        return radiance;
     }
     else
     {
