@@ -11,6 +11,7 @@
 #include "Material.hpp"
 #include "Mesh.hpp"
 #include "ObjectGraph.hpp"
+#include "Sampler.hpp"
 
 #include "glm/glm.hpp"
 #include "glm/gtx/rotate_vector.hpp"
@@ -48,44 +49,6 @@ void DoToneMapping(int width, int height, float const* pDataIn, uint8_t* pDataOu
     }
 }
 
-
-void OrthonormalBase(glm::vec3 const& v1, glm::vec3& v2, glm::vec3& v3) {
-    if (std::abs(v1.x) > std::abs(v1.y)) {
-        float invLen = 1.f / sqrtf(v1.x * v1.x + v1.z * v1.z);
-        v2 = glm::vec3(-v1.z * invLen, 0.0f, v1.x * invLen);
-    }
-    else {
-        float invLen = 1.0f / sqrtf(v1.y * v1.y + v1.z * v1.z);
-        v2 = glm::vec3(0.0f, v1.z * invLen, -v1.y * invLen);
-    }
-    v3 = glm::cross(v1, v2);
-}
-
-glm::vec3 RandomHemisphericalDirection(glm::vec3 const& normal)
-{
-    glm::vec3 const N = glm::normalize(normal);
-    float const u1 = drgn::GenerateRandomUnitFloat();
-    float const u2 = drgn::GenerateRandomUnitFloat();
-    float const r = sqrt(1.0f - u1 * u1);
-    float const theta = 2 * drgn::Pi * u2;
-
-    glm::vec3 const dir(cos(theta) * r, sin(theta) * r, u1);
-
-    DRGN_ASSERT_UNIT_VECTOR(dir);
-
-    glm::vec3 X;
-    glm::vec3 Y;
-    OrthonormalBase(N, X, Y);
-
-    glm::vec3 finalDir = dir.x * X + dir.y * Y + dir.z * N;
-
-    DRGN_ASSERT_UNIT_VECTOR(finalDir);
-    float const dot = glm::dot(finalDir, N);
-    DRGN_ASSERT(dot >= -0.00001f);
-
-        return finalDir;
-}
-
 float MaxComponent(glm::vec3 const& vec)
 {
     return std::max(vec.x, std::max(vec.y, vec.z));
@@ -100,7 +63,7 @@ glm::vec3 Radiance(Ray const& ray, ObjectGraph const& scene, int depth)
     {
         Material const* pMaterial = intersection.GetMaterial();
 
-        auto dir = RandomHemisphericalDirection(intersection.GetNormal());
+        auto dir = Sampler::CosineHemisphericalDirection(intersection.GetNormal());
         auto point = ray.GetPoint(intersection.GetDistance());
         Ray nextRay(point, dir);
 
@@ -115,7 +78,8 @@ glm::vec3 Radiance(Ray const& ray, ObjectGraph const& scene, int depth)
         float const invP = 1.0f / p;
         if (u < p)
         {
-            radiance += invP * pMaterial->Albedo * Radiance(nextRay, scene, depth + 1) * cosTheta;
+            float constexpr brdf_pdf_cosTheta = 0.5f;
+            radiance += invP * pMaterial->Albedo * Radiance(nextRay, scene, depth + 1) * brdf_pdf_cosTheta;
         }
 
         return radiance;

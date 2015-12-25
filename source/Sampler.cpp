@@ -14,7 +14,7 @@ void Sampler::OrthonormalBase(glm::vec3 const& v1, glm::vec3& v2, glm::vec3& v3)
     v3 = glm::cross(v1, v2);
 }
 
-glm::vec3 Sampler::SphericalDirection()
+glm::vec3 Sampler::UniformSphericalDirection()
 {
     float hemisphereChoice = 1.0f;
 
@@ -23,10 +23,10 @@ glm::vec3 Sampler::SphericalDirection()
         hemisphereChoice = -1.0f;
     }
     
-    return HemisphericalDirection(glm::vec3(0.0f, 0.0f, hemisphereChoice));
+    return UniformHemisphericalDirection(glm::vec3(0.0f, 0.0f, hemisphereChoice));
 }
 
-glm::vec3 Sampler::HemisphericalDirection(glm::vec3 const& normal)
+glm::vec3 Sampler::UniformHemisphericalDirection(glm::vec3 const& normal)
 {
     glm::vec3 const N = glm::normalize(normal);
     float const u1 = drgn::GenerateRandomUnitFloat();
@@ -35,6 +35,31 @@ glm::vec3 Sampler::HemisphericalDirection(glm::vec3 const& normal)
     float const theta = 2 * drgn::Pi * u2;
 
     glm::vec3 const dir(cos(theta) * r, sin(theta) * r, u1);
+
+    DRGN_ASSERT_UNIT_VECTOR(dir);
+
+    glm::vec3 X;
+    glm::vec3 Y;
+    OrthonormalBase(N, X, Y);
+
+    glm::vec3 finalDir = dir.x * X + dir.y * Y + dir.z * N;
+
+    DRGN_ASSERT_UNIT_VECTOR(finalDir);
+    float const dot = glm::dot(finalDir, N);
+    DRGN_ASSERT(dot >= -0.00001f);
+
+    return finalDir;
+}
+
+glm::vec3 Sampler::CosineHemisphericalDirection(glm::vec3 const& normal)
+{
+    glm::vec3 const N = glm::normalize(normal);
+    float const u1 = drgn::GenerateRandomUnitFloat();
+    float const u2 = drgn::GenerateRandomUnitFloat();
+    float const r = sqrt(u1);
+    float const theta = 2 * drgn::Pi * u2;
+
+    glm::vec3 const dir(cos(theta) * r, sin(theta) * r, sqrt(1.0 - u1));
 
     DRGN_ASSERT_UNIT_VECTOR(dir);
 

@@ -6,8 +6,9 @@
 class Sampler
 {
 public:
-    static glm::vec3 HemisphericalDirection(glm::vec3 const& normal);
-    static glm::vec3 SphericalDirection();
+    static glm::vec3 CosineHemisphericalDirection(glm::vec3 const& normal);
+    static glm::vec3 UniformHemisphericalDirection(glm::vec3 const& normal);
+    static glm::vec3 UniformSphericalDirection();
 
 private:
     static void OrthonormalBase(glm::vec3 const& v1, glm::vec3& v2, glm::vec3& v3);

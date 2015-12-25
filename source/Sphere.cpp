@@ -88,5 +88,5 @@ float Sphere::Surface() const
 
 glm::vec3 Sphere::SampleUniform() const
 {
-    return m_Radius * Sampler::SphericalDirection() + m_Center;
+    return m_Radius * Sampler::UniformSphericalDirection() + m_Center;
 }
