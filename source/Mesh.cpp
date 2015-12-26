@@ -111,7 +111,7 @@ float Mesh::Surface() const
         glm::vec3 const& p1 = m_VertexBuffer[i + 1];
         glm::vec3 const& p2 = m_VertexBuffer[i + 2];
 
-        surface += 0.5f + glm::length(glm::cross(p1 - p0, p2 - p0));
+        surface += 0.5f * glm::length(glm::cross(p1 - p0, p2 - p0));
     }
 
     return surface;
@@ -132,7 +132,7 @@ glm::vec3 Mesh::SampleUniform() const
         p1 = &m_VertexBuffer[i + 1];
         p2 = &m_VertexBuffer[i + 2];
 
-        surfaceAcc += 0.5f + glm::length(glm::cross(*p1 - *p0, *p2 - *p0));
+        surfaceAcc += 0.5f * glm::length(glm::cross(*p1 - *p0, *p2 - *p0));
 
         if (s < surfaceAcc)
         {

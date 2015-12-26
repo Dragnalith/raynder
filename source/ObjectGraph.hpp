@@ -13,7 +13,7 @@ class ObjectGraph
 public:
     void Add(Object const& object);
     bool Intersect(Ray const& ray, Intersection* pIntersection) const;
-    glm::vec3 SampleLight(glm::vec3 const& position) const;
+    glm::vec3 SampleLight(glm::vec3 const& position, float* pPDF) const;
 
 private:
     std::vector<Object const*> m_EmissiveObjects;

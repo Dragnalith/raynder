@@ -63,26 +63,57 @@ glm::vec3 Radiance(Ray const& ray, ObjectGraph const& scene, int depth)
     {
         Material const* pMaterial = intersection.GetMaterial();
 
-        auto dir = Sampler::CosineHemisphericalDirection(intersection.GetNormal());
-        auto point = ray.GetPoint(intersection.GetDistance());
-        Ray nextRay(point, dir);
-
-        auto radiance = pMaterial->Emissive;
 
         float constexpr pMin = 0.01f;
         float const albedoMax = MaxComponent(pMaterial->Albedo);
-        float const cosTheta = glm::dot(dir, intersection.GetNormal());
         float const u = drgn::GenerateRandomUnitFloat();
-        float const p = (depth <= 1) ? 1.0f : std::max(pMin, std::min(1.0f, cosTheta * albedoMax));
-        DRGN_ASSERT(p >= pMin && p <= 1.0f);
+        //float const p = (depth <= 2) ? 1.0f : std::max(pMin, 0.3f * std::min(1.0f, albedoMax));
+        //DRGN_ASSERT(p >= pMin && p <= 1.0f);
+        float const p = depth <= 1 ? 1.0f : 0.0f;
         float const invP = 1.0f / p;
         if (u < p)
         {
-            float constexpr brdf_pdf_cosTheta = 0.5f;
-            radiance += invP * pMaterial->Albedo * Radiance(nextRay, scene, depth + 1) * brdf_pdf_cosTheta;
+            glm::vec3 direct(0.0f, 0.0f, 0.0f);
+            glm::vec3 indirect(0.0f, 0.0f, 0.0f);
+            auto point = ray.GetPoint(intersection.GetDistance());
+            // Direct
+            {
+                float constexpr brdf = 1.0f / (2.0f * drgn::Pi);
+                float pdf;
+                auto lightPosition = scene.SampleLight(point, &pdf);
+
+                Ray lightRay(point, glm::normalize(lightPosition - point));
+
+                Intersection lightIntersection;
+                if (scene.Intersect(lightRay, &lightIntersection) && lightIntersection.GetDistance() > 0.0001 && lightIntersection.GetDistance() >= (glm::distance(point, lightPosition) - 0.0001f))
+                {
+                    float const cosThetaPoint = glm::dot(intersection.GetNormal(), lightRay.GetDirection());
+                    float const cosThetaLight = glm::dot(lightIntersection.GetNormal(), -lightRay.GetDirection());
+                    float const lightDistance = lightIntersection.GetDistance();
+                    direct = pMaterial->Albedo * brdf * lightIntersection.GetMaterial()->Emissive * pdf * cosThetaPoint * cosThetaLight / (lightDistance * lightDistance);
+
+                    //DRGN_ASSERT(direct.r <= 10.0f);
+                    //DRGN_ASSERT(direct.g <= 10.0f);
+                    //DRGN_ASSERT(direct.b <= 10.0f);
+                }
+            }
+            // Indirect
+            {
+                auto dir = Sampler::CosineHemisphericalDirection(intersection.GetNormal());
+                Ray nextRay(point, dir);
+                float const cosTheta = glm::dot(dir, intersection.GetNormal());
+                float constexpr brdf_pdf_cosTheta = 0.5f;
+                auto in_radiance = Radiance(nextRay, scene, depth + 1);
+                indirect = pMaterial->Albedo * in_radiance * brdf_pdf_cosTheta;
+            }
+            auto normalizedRadiance =  invP * (direct + indirect);
+            return normalizedRadiance;
+        }
+        else
+        {
+            return glm::vec3(0.0f, 0.0f, 0.0f);
         }
 
-        return radiance;
     }
     else
     {
@@ -198,7 +229,7 @@ int main(int argc, char** argv)
 
         auto t1 = std::chrono::steady_clock::now();
 
-        #pragma omp parallel for schedule(dynamic)
+        //#pragma omp parallel for
         for (int y = 0; y < Height; y++)
         {
             for (int x = 0; x < Width; x++)
@@ -209,6 +240,12 @@ int main(int argc, char** argv)
                 Ray  ray(cameraOrigin, rayPosition - cameraOrigin);
 
                 auto color = Radiance(ray, scene, 0);
+                
+                Intersection intersection;
+                if (scene.Intersect(ray, &intersection))
+                {
+                    color += intersection.GetMaterial()->Emissive;
+                }
 
                 int const offset = (y * Width + x) * 3;
                 int sampleCountPlusOne = sampleCount + 1;

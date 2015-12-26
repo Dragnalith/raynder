@@ -58,7 +58,7 @@ inline float GenerateRandomUnitFloat()
 }
 inline int GenerateRandomInteger(int min, int max)
 {
-    DRGN_ASSERT(min < max);
+    DRGN_ASSERT(min <= max);
     std::uniform_int_distribution<int> randomInt(min, max);
 
     return randomInt(PseudoRandom);

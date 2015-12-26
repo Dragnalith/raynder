@@ -47,23 +47,14 @@ bool ObjectGraph::Intersect(Ray const& ray, Intersection* pIntersection) const
     return true;
 }
 
-glm::vec3 ObjectGraph::SampleLight(glm::vec3 const& position) const
+glm::vec3 ObjectGraph::SampleLight(glm::vec3 const& position, float* pPDF) const
 {
     DRGN_ASSERT(m_EmissiveObjects.size() > 0);
 
     size_t objectIdx = drgn::GenerateRandomInteger(0, m_EmissiveObjects.size() - 1);
 
     Object const* pObject = m_EmissiveObjects[objectIdx];
-    glm::vec3 sample = pObject->SampleUniform();
-    Ray ray(position, glm::normalize(sample - position));
-
-    Intersection intersection;
-    if (!Intersect(ray, &intersection) || intersection.GetDistance() < (glm::distance(position, sample) - 0.0001f))
-    {
-        return glm::vec3(0.0f, 0.0f, 0.0f);
-    }
-    else
-    {
-        return pObject->GetMaterial()->Emissive * float(m_EmissiveObjects.size()) * pObject->Surface() * glm::dot(intersection.GetNormal(), -ray.GetDirection()) / (intersection.GetDistance() * intersection.GetDistance());
-    }
+    
+    *pPDF = float(m_EmissiveObjects.size()) * pObject->Surface();
+    return pObject->SampleUniform();
 }
