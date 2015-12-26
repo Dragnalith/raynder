@@ -49,11 +49,6 @@ void DoToneMapping(int width, int height, float const* pDataIn, uint8_t* pDataOu
     }
 }
 
-float MaxComponent(glm::vec3 const& vec)
-{
-    return std::max(vec.x, std::max(vec.y, vec.z));
-}
-
 glm::vec3 Radiance(Ray const& ray, ObjectGraph const& scene, int depth)
 {
     Intersection intersection;
@@ -63,13 +58,8 @@ glm::vec3 Radiance(Ray const& ray, ObjectGraph const& scene, int depth)
     {
         Material const* pMaterial = intersection.GetMaterial();
 
-
-        float constexpr pMin = 0.01f;
-        float const albedoMax = MaxComponent(pMaterial->Albedo);
         float const u = drgn::GenerateRandomUnitFloat();
-        //float const p = (depth <= 2) ? 1.0f : std::max(pMin, 0.3f * std::min(1.0f, albedoMax));
-        //DRGN_ASSERT(p >= pMin && p <= 1.0f);
-        float const p = depth <= 1 ? 1.0f : 0.0f;
+        float const p = (depth <= 2) ? 1.0f : 0.5f;
         float const invP = 1.0f / p;
         if (u < p)
         {
@@ -91,10 +81,6 @@ glm::vec3 Radiance(Ray const& ray, ObjectGraph const& scene, int depth)
                     float const cosThetaLight = glm::dot(lightIntersection.GetNormal(), -lightRay.GetDirection());
                     float const lightDistance = lightIntersection.GetDistance();
                     direct = pMaterial->Albedo * brdf * lightIntersection.GetMaterial()->Emissive * pdf * cosThetaPoint * cosThetaLight / (lightDistance * lightDistance);
-
-                    //DRGN_ASSERT(direct.r <= 10.0f);
-                    //DRGN_ASSERT(direct.g <= 10.0f);
-                    //DRGN_ASSERT(direct.b <= 10.0f);
                 }
             }
             // Indirect
@@ -133,12 +119,15 @@ int main(int argc, char** argv)
 
     glm::vec3 const SphereCenter(0.7f, -1.0f, -.7f);
     float const SphereRadius = 0.5f;
+    glm::vec3 const LightSphereCenter(0.0f, 1.2f, 0.0f);
+    float const LightSphereRadius = 0.1f;
 
     // Scene objects
     Camera camera(CameraPosition, CameraFront, CameraUp,
         CameraBottom, CameraTop, CameraLeft, CameraRight);
 
     Sphere sphere(SphereCenter, SphereRadius, DiffuseMaterial(glm::vec3(1.0f, 1.0f, 1.0f)));
+    Sphere lightSphere(LightSphereCenter, LightSphereRadius, EmissiveMaterial(glm::vec3(90.0f, 90.0f, 90.0f)));
 
     float const size = 1.5f;
     glm::vec3 backWallArray[] = {
@@ -166,7 +155,7 @@ int main(int argc, char** argv)
         glm::vec3(-size, size, -size), glm::vec3( size, size, -size), glm::vec3( size, size,  size)
     };
 
-    float const lightHeight = 0.95f * size;
+    float const lightHeight = 0.99999f * size;
     float const lightSize = 0.3f * size;
 
     glm::vec3 lightArray[] = {
@@ -184,6 +173,7 @@ int main(int argc, char** argv)
 
     ObjectGraph scene;
     scene.Add(light);
+    //scene.Add(lightSphere);
     scene.Add(sphere);
     scene.Add(backWall);
     scene.Add(leftWall);
@@ -220,16 +210,21 @@ int main(int argc, char** argv)
         auto start = std::chrono::steady_clock::now();
         // Process events
         sf::Event event;
+        bool next = false;
         while (window.pollEvent(event))
         {
             // Close window: exit
             if (event.type == sf::Event::Closed)
                 window.close();
+            if (event.type == sf::Event::KeyPressed)
+            {
+                next = true;
+            }
         }
 
         auto t1 = std::chrono::steady_clock::now();
 
-        //#pragma omp parallel for
+        #pragma omp parallel for
         for (int y = 0; y < Height; y++)
         {
             for (int x = 0; x < Width; x++)
@@ -239,8 +234,15 @@ int main(int argc, char** argv)
                 auto rayPosition = imageOrigin + rayX * xPixelVec + rayY * yPixelVec;
                 Ray  ray(cameraOrigin, rayPosition - cameraOrigin);
 
+                if (x == 144 && y == 458) { 
+                    int i = 0; i += 1; }
+                if (x == 262 && y == 457) {
+                    int i = 0; i += 1; }
+                if (x == 206 && y == 455) {
+                    int i = 0; i += 1; }
+
                 auto color = Radiance(ray, scene, 0);
-                
+
                 Intersection intersection;
                 if (scene.Intersect(ray, &intersection))
                 {

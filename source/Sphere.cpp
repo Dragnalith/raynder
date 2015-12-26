@@ -83,7 +83,7 @@ bool Sphere::Intersect(Ray const& ray, Intersection* pIntersection) const
 
 float Sphere::Surface() const
 {
-    return 4 * drgn::Pi * m_Radius;
+    return 4 * drgn::Pi * m_Radius * m_Radius;
 }
 
 glm::vec3 Sphere::SampleUniform() const
