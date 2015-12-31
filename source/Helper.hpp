@@ -35,7 +35,7 @@ char(&ArraySizeHelper(T(&t)[N]))[N];
 namespace drgn
 {
 
-float const Pi = 3.14159265358979323846f;
+float constexpr Pi = 3.14159265358979323846f;
 
 template<typename T>
 inline T Clamp(T value, T min, T max)

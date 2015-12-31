@@ -20,7 +20,6 @@
 #include <iostream>
 #include <chrono>
 #include <iomanip>
-#include <omp.h>
 
 int const Width = 700;
 int const Height = 700;
