@@ -48,7 +48,22 @@ void DoToneMapping(int width, int height, float const* pDataIn, uint8_t* pDataOu
     }
 }
 
+glm::vec3 ReflectedRadiance(Ray const& ray, ObjectGraph const&, int depth);
+
 glm::vec3 Radiance(Ray const& ray, ObjectGraph const& scene, int depth)
+{
+    auto color = ReflectedRadiance(ray, scene, depth);
+
+    Intersection intersection;
+    if (scene.Intersect(ray, &intersection))
+    {
+        color += intersection.GetMaterial()->Emissive;
+    }
+    
+    return color;
+}
+
+glm::vec3 ReflectedRadiance(Ray const& ray, ObjectGraph const& scene, int depth)
 {
     Intersection intersection;
     bool result = scene.Intersect(ray, &intersection);
@@ -58,41 +73,51 @@ glm::vec3 Radiance(Ray const& ray, ObjectGraph const& scene, int depth)
         Material const* pMaterial = intersection.GetMaterial();
 
         float const u = drgn::GenerateRandomUnitFloat();
-        float const p = (depth <= 2) ? 1.0f : 0.5f;
+        float const p = (depth <= 5) ? 1.0f : 0.0f;
         float const invP = 1.0f / p;
         if (u < p)
         {
             glm::vec3 direct(0.0f, 0.0f, 0.0f);
             glm::vec3 indirect(0.0f, 0.0f, 0.0f);
             auto point = ray.GetPoint(intersection.GetDistance());
-            // Direct
+            if (pMaterial->BrdfType == Material::DIFFUSE)
             {
-                float constexpr brdf = 1.0f / (2.0f * drgn::Pi);
-                float pdf;
-                auto lightPosition = scene.SampleLight(point, &pdf);
-
-                Ray lightRay(point, glm::normalize(lightPosition - point));
-
-                Intersection lightIntersection;
-                if (scene.Intersect(lightRay, &lightIntersection) && lightIntersection.GetDistance() > 0.0001 && lightIntersection.GetDistance() >= (glm::distance(point, lightPosition) - 0.0001f))
+                // Direct
                 {
-                    float const cosThetaPoint = glm::dot(intersection.GetNormal(), lightRay.GetDirection());
-                    float const cosThetaLight = glm::dot(lightIntersection.GetNormal(), -lightRay.GetDirection());
-                    float const lightDistance = lightIntersection.GetDistance();
-                    direct = pMaterial->Albedo * brdf * lightIntersection.GetMaterial()->Emissive * pdf * cosThetaPoint * cosThetaLight / (lightDistance * lightDistance);
+                    float constexpr brdf = 1.0f / (2.0f * drgn::Pi);
+                    float pdf;
+                    auto lightPosition = scene.SampleLight(point, &pdf);
+
+                    Ray lightRay(point, glm::normalize(lightPosition - point));
+
+                    Intersection lightIntersection;
+                    if (scene.Intersect(lightRay, &lightIntersection) && lightIntersection.GetDistance() > 0.0001 && lightIntersection.GetDistance() >= (glm::distance(point, lightPosition) - 0.0001f))
+                    {
+                        float const cosThetaPoint = glm::dot(intersection.GetNormal(), lightRay.GetDirection());
+                        float const cosThetaLight = glm::dot(lightIntersection.GetNormal(), -lightRay.GetDirection());
+                        float const lightDistance = lightIntersection.GetDistance();
+                        direct = pMaterial->Albedo * brdf * lightIntersection.GetMaterial()->Emissive * pdf * cosThetaPoint *   cosThetaLight / (lightDistance * lightDistance);
+                    }
                 }
+                // Indirect
+                {
+                    auto dir = Sampler::CosineHemisphericalDirection(intersection.GetNormal());
+                    Ray nextRay(point, dir);
+                    float constexpr brdf_pdf_cosTheta = 0.5f;
+                    auto in_radiance = ReflectedRadiance(nextRay, scene, depth + 1);
+                    indirect = pMaterial->Albedo * in_radiance * brdf_pdf_cosTheta;
+                }
+                auto normalizedRadiance =  invP * (direct + indirect);
+                return normalizedRadiance;
             }
-            // Indirect
+            else if (pMaterial->BrdfType == Material::REFLECTION)
             {
-                auto dir = Sampler::CosineHemisphericalDirection(intersection.GetNormal());
-                Ray nextRay(point, dir);
+                glm::vec3 dir = glm::reflect(ray.GetDirection(), intersection.GetNormal());
                 float const cosTheta = glm::dot(dir, intersection.GetNormal());
-                float constexpr brdf_pdf_cosTheta = 0.5f;
-                auto in_radiance = Radiance(nextRay, scene, depth + 1);
-                indirect = pMaterial->Albedo * in_radiance * brdf_pdf_cosTheta;
+                Ray nextRay(point, dir);
+
+                return pMaterial->Albedo * Radiance(nextRay, scene, depth + 1) * cosTheta;
             }
-            auto normalizedRadiance =  invP * (direct + indirect);
-            return normalizedRadiance;
         }
         else
         {
@@ -125,7 +150,7 @@ int main(int argc, char** argv)
     Camera camera(CameraPosition, CameraFront, CameraUp,
         CameraBottom, CameraTop, CameraLeft, CameraRight);
 
-    Sphere sphere(SphereCenter, SphereRadius, DiffuseMaterial(glm::vec3(1.0f, 1.0f, 1.0f)));
+    Sphere sphere(SphereCenter, SphereRadius, ReflectionMaterial(glm::vec3(1.0f, 1.0f, 1.0f)));
     Sphere lightSphere(LightSphereCenter, LightSphereRadius, EmissiveMaterial(glm::vec3(90.0f, 90.0f, 90.0f)));
 
     float const size = 1.5f;
@@ -239,14 +264,8 @@ int main(int argc, char** argv)
                     int i = 0; i += 1; }
                 if (x == 206 && y == 455) {
                     int i = 0; i += 1; }
-
+                
                 auto color = Radiance(ray, scene, 0);
-
-                Intersection intersection;
-                if (scene.Intersect(ray, &intersection))
-                {
-                    color += intersection.GetMaterial()->Emissive;
-                }
 
                 int const offset = (y * Width + x) * 3;
                 int sampleCountPlusOne = sampleCount + 1;
