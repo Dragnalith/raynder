@@ -141,8 +141,10 @@ int main(int argc, char** argv)
     float const CameraLeft   = -0.75f;
     float const CameraRight  =  0.75f;
 
-    glm::vec3 const SphereCenter(0.7f, -1.0f, -.7f);
+    glm::vec3 const SphereCenter(0.9f, -1.0f, .7f);
     float const SphereRadius = 0.5f;
+    glm::vec3 const SphereCenter2(-0.7f, -1.0f, .2f);
+    float const SphereRadius2 = 0.5f;
     glm::vec3 const LightSphereCenter(0.0f, 1.2f, 0.0f);
     float const LightSphereRadius = 0.1f;
 
@@ -151,6 +153,7 @@ int main(int argc, char** argv)
         CameraBottom, CameraTop, CameraLeft, CameraRight);
 
     Sphere sphere(SphereCenter, SphereRadius, ReflectionMaterial(glm::vec3(1.0f, 1.0f, 1.0f)));
+    Sphere sphere2(SphereCenter2, SphereRadius2, DiffuseMaterial(glm::vec3(1.0f, .30f, .5f)));
     Sphere lightSphere(LightSphereCenter, LightSphereRadius, EmissiveMaterial(glm::vec3(90.0f, 90.0f, 90.0f)));
 
     float const size = 1.5f;
@@ -199,6 +202,7 @@ int main(int argc, char** argv)
     scene.Add(light);
     //scene.Add(lightSphere);
     scene.Add(sphere);
+    scene.Add(sphere2);
     scene.Add(backWall);
     scene.Add(leftWall);
     scene.Add(rightWall);
